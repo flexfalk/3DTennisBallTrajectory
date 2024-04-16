@@ -1,13 +1,13 @@
 import cv2
 import numpy as np
 from scipy.spatial import distance
-# from utils import line_intersection
 import sympy
 from sympy import Line
 import os
 import torch
 import pandas as pd
 import torch.nn.functional as F
+import config_path
 
 
 def gaussian2D(shape, sigma=1):
@@ -151,11 +151,6 @@ def merge_lines(lines):
     return new_lines
 
 
-# from court_reference import CourtReference
-import numpy as np
-import cv2
-from scipy.spatial import distance
-
 
 def make_court_conf():
     court_ref = CourtReference()
@@ -171,6 +166,7 @@ def make_court_conf():
     return court_conf_ind, court_ref, refer_kps
 
 from court_reference import CourtReference
+print('did it')
 def get_trans_matrix(points):
     matrix_trans = None
     dist_max = np.Inf
@@ -194,7 +190,6 @@ def get_trans_matrix(points):
                 dist_max = dist_median
     return matrix_trans, refer_kps
 
-from CourtTrackerNet import CourtTrackerNet
 def run_on_image(game_path, model, use_refine_kps, use_homography):
     x_coords = []
     y_coords = []
