@@ -31,7 +31,7 @@ model = model.to(device)
 
 # Path to Input Data.
 # Place data in the data folder
-images_path = 'Data/Dataset'
+images_path = 'Data/dataset'
 
 
 # Path for output data
