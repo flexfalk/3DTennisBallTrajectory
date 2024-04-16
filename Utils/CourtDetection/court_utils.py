@@ -1,11 +1,5 @@
 import os
 import sys
-
-# Add the parent directory to sys.path
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.insert(1, parent_dir)
-
-
 import cv2
 import numpy as np
 from scipy.spatial import distance
@@ -16,6 +10,7 @@ import torch
 import pandas as pd
 import torch.nn.functional as F
 import config_path
+
 
 
 def gaussian2D(shape, sigma=1):
@@ -174,7 +169,8 @@ def make_court_conf():
     return court_conf_ind, court_ref, refer_kps
 
 from court_reference import CourtReference
-print('did it')
+
+
 def get_trans_matrix(points):
     matrix_trans = None
     dist_max = np.Inf
