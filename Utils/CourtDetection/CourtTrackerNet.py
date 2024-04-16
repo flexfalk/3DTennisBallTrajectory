@@ -15,7 +15,7 @@ class ConvBlock(nn.Module):
         return self.block(x)
 
 
-class BallTrackerNet(nn.Module):
+class CourtTrackerNet(nn.Module):
     def __init__(self, out_channels=14):
         super().__init__()
         self.out_channels = out_channels

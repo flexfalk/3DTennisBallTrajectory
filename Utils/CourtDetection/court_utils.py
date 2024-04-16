@@ -194,7 +194,7 @@ def get_trans_matrix(points):
                 dist_max = dist_median
     return matrix_trans, refer_kps
 
-from BallTrackerNet import BallTrackerNet
+from CourtTrackerNet import CourtTrackerNet
 def run_on_image(game_path, model, use_refine_kps, use_homography):
     x_coords = []
     y_coords = []
