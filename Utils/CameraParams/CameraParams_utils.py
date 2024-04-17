@@ -43,21 +43,31 @@ def find_poles_and_corners_world():
     net_height_sides = 1.067
 
     # Find corners
-    left_bottom_corner = [0, 0, 0]
-    right_bottom_corner = [court_width, 0, 0]
+    # left_bottom_corner = [0, 0, 0]
+    # right_bottom_corner = [court_width, 0, 0]
+    left_bottom_corner = [-half_width_length, -half_court_length, 0]
+    right_bottom_corner = [half_width_length, -half_court_length, 0]
 
-    left_top_corner = [0, court_length, 0]
-    right_top_corner = [court_width, court_length, 0]
+    # left_top_corner = [0, court_length, 0]
+    # right_top_corner = [court_width, court_length, 0]
+    left_top_corner = [-half_width_length, half_court_length, 0]
+    right_top_corner = [half_width_length, half_court_length, 0]
 
     # Find poles
-    left_pole_top = [0 + 0.3, half_court_length, net_height_sides]
-    left_pole_bottom = [0 + 0.3, half_court_length, 0]
+    # left_pole_top = [0 + 0.3, half_court_length, net_height_sides]
+    # left_pole_bottom = [0 + 0.3, half_court_length, 0]
+    left_pole_top = [-half_width_length + 0.3, 0, net_height_sides]
+    left_pole_bottom = [-half_width_length + 0.3, 0, 0]
 
-    middle_net_top = [half_width_length, half_court_length, net_height_middle]
-    middle_net_bottom = [half_width_length, half_court_length, 0]
+    # middle_net_top = [half_width_length, half_court_length, net_height_middle]
+    # middle_net_bottom = [half_width_length, half_court_length, 0]
+    middle_net_top = [0, 0, net_height_middle]
+    middle_net_bottom = [0, 0, 0]
 
-    right_pole_top = [court_width - 0.3, half_court_length, net_height_sides]
-    right_pole_bottom = [court_width - 0.3, half_court_length, 0]
+    # right_pole_top = [court_width - 0.3, half_court_length, net_height_sides]
+    # right_pole_bottom = [court_width - 0.3, half_court_length, 0]
+    right_pole_top = [half_width_length - 0.3, 0, net_height_sides]
+    right_pole_bottom = [half_width_length - 0.3, 0, 0]
 
     return [left_pole_top, left_pole_bottom,
             middle_net_top, middle_net_bottom,
