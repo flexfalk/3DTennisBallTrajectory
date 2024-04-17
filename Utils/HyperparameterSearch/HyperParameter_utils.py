@@ -181,7 +181,7 @@ def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bo
     if flip:
         return (x, y), (flipped_x, flipped_y)
     else:
-        return (x, y), (_, _)
+        return (x, y), ('', '')
 
 
 def batch_all_data(paths: List[str], winlen: int, stepsize: int,
