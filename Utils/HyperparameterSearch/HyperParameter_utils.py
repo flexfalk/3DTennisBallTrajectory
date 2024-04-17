@@ -155,7 +155,9 @@ def add_corners():
     return natsorted(all_csv)
 
 
-def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bool):
+
+
+def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bool, only_ball: bool, only_pose: bool):
     # each df is a df of clip.
     if flip:
         flipped_df = horizontal_flip(df, alpha)
@@ -166,6 +168,12 @@ def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bo
         if remove_key_points:
             flipped_x = flipped_x.drop(columns=['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                                                 '34', '35', '36', '37', '38', '39', '40', '41', '42', '43'])
+        if only_ball:
+            col_to_remove = [str(i) for i in range(68)]
+            flipped_x = flipped_x.drop(columns=col_to_remove)
+
+        if only_pose:
+            flipped_x = flipped_x.drop(columns=['ball_x', 'ball_y'])
 
         flipped_x = min_max_norm(flipped_x, remove_key_points)
 
@@ -175,6 +183,13 @@ def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bo
     if remove_key_points:
         x = x.drop(columns=['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                             '34', '35', '36', '37', '38', '39', '40', '41', '42', '43'])
+    if only_ball:
+        col_to_remove = [str(i) for i in range(68)]
+        x = x.drop(columns=col_to_remove)
+        # x = x[['ball_x', 'ball_y']]
+
+    if only_pose:
+        x = x.drop(columns=['ball_x', 'ball_y'])
 
     x = min_max_norm(x, remove_key_points)
 
@@ -186,7 +201,8 @@ def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bo
 
 def batch_all_data(paths: List[str], winlen: int, stepsize: int,
                    num_relax: int, alpha: float, remove_key_points: bool, corners: bool,
-                   only_hits: bool = False, only_bounce: bool = False, flip: bool = False):
+                   only_hits: bool = False, only_bounce: bool = False, flip: bool = False,
+                   only_ball: bool = False, only_pose: bool = False):
     num_features = len(pd.read_csv(paths[0]).columns) - 2
 
     nr_features_to_remove = 0
@@ -196,22 +212,26 @@ def batch_all_data(paths: List[str], winlen: int, stepsize: int,
     if corners:
         nr_features_to_remove -= 8
 
+    if only_pose:
+        nr_features_to_remove += 2
+    if only_ball:
+        nr_features_to_remove += 68
+
     all_x = np.array([]).reshape((0, winlen, num_features - nr_features_to_remove))
     all_y = np.array([]).reshape((0,))
 
     num_matches = len(paths)
 
-    # Make paths for corners
-    #     if corners:
-    #         corner_paths = add_corners
-
     for i in range(num_matches):
         df = pd.read_csv(paths[i])
-        game_name = paths[i].split('/')[-3]
-        clip_name = paths[i].split('/')[-2]
 
         if corners:
-            corner_df = pd.read_csv(f"/kaggle/input/court-poles/Dataset/{game}/{clip}/court.csv")
+            game = paths[i].split('/')[-3]
+            clip = paths[i].split('/')[-2]
+
+            corner_path = f'/kaggle/input/court-detection-coordinates/Dataset/{game}/{clip}/court.csv'
+
+            corner_df = pd.read_csv(corner_path)
 
             # get the four corners
             corner_df = corner_df[corner_df['point'].isin([0, 1, 2, 3])][['x-coordinate', 'y-coordinate']]
@@ -224,13 +244,15 @@ def batch_all_data(paths: List[str], winlen: int, stepsize: int,
             df = df.assign(**dict(zip(new_columns, corner_list)))
 
         if flip:
-            (x, y), (flipped_x, flipped_y) = preprocess(df, flip=True, alpha=alpha,
-                                                        remove_key_points=remove_key_points)  # Set flip = True for flipping
+            (x, y), (flipped_x, flipped_y) = preprocess(df, flip=True, alpha=alpha, remove_key_points=remove_key_points,
+                                                        only_ball=only_ball,
+                                                        only_pose=only_pose)  # Set flip = True for flipping
 
         else:
-            (x, y), _ = preprocess(df, flip=False, alpha=alpha, remove_key_points=remove_key_points)
+            (x, y), _ = preprocess(df, flip=False, alpha=alpha, remove_key_points=remove_key_points,
+                                   only_ball=only_ball, only_pose=only_pose)
 
-            # batch the data
+        # batch the data
         batch_x = batch_X(x, winlen, stepsize)
         if flip:
             flipped_batch_x = batch_X(flipped_x, winlen, stepsize)
@@ -257,7 +279,6 @@ def batch_all_data(paths: List[str], winlen: int, stepsize: int,
         all_x = np.concatenate((all_x, batch_x))
         all_y = np.concatenate((all_y, batch_y))
     return (all_x, all_y)
-
 
 def dataBatcher(winlen: int, n_split: int, stepsize: int, num_relax: int,
                 balance: bool, alpha: float, remove_key_points: bool, corners: bool,
