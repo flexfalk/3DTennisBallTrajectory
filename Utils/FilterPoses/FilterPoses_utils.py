@@ -327,7 +327,7 @@ def create_pose_csv(clip_path):
         court_corners = find_court_corners(game, clip)
 
         filtered_poses = filter_pose_dist_from_lines(poses, court_corners, game)
-        print(filtered_poses)
+        #print(filtered_poses)
         player1 = filtered_poses[0]["keypoints"]
         player2 = filtered_poses[1]["keypoints"]
 
