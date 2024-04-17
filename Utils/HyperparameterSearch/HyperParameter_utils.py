@@ -157,7 +157,7 @@ def add_corners():
 
 
 
-def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bool, only_ball: bool, only_pose: bool):
+def preprocess(df: pd.DataFrame, flip: bool, alpha: float, remove_key_points: bool, only_ball: bool = False, only_pose: bool = False):
     # each df is a df of clip.
     if flip:
         flipped_df = horizontal_flip(df, alpha)
