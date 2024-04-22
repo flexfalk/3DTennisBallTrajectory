@@ -38,26 +38,26 @@ def find_poles_and_corners_world():
     court_length = 23.77
     court_width = 10.97
     half_court_length = court_length / 2
-    half_width_length = court_width / 2
+    half_court_width = court_width / 2
     net_height_middle = 0.91
     net_height_sides = 1.067
 
     # Find corners
     # left_bottom_corner = [0, 0, 0]
     # right_bottom_corner = [court_width, 0, 0]
-    left_bottom_corner = [-half_width_length, -half_court_length, 0]
-    right_bottom_corner = [half_width_length, -half_court_length, 0]
+    left_bottom_corner = [-half_court_width, -half_court_length, 0]
+    right_bottom_corner = [half_court_width, -half_court_length, 0]
 
     # left_top_corner = [0, court_length, 0]
     # right_top_corner = [court_width, court_length, 0]
-    left_top_corner = [-half_width_length, half_court_length, 0]
-    right_top_corner = [half_width_length, half_court_length, 0]
+    left_top_corner = [-half_court_width, half_court_length, 0]
+    right_top_corner = [half_court_width, half_court_length, 0]
 
     # Find poles
     # left_pole_top = [0 + 0.3, half_court_length, net_height_sides]
     # left_pole_bottom = [0 + 0.3, half_court_length, 0]
-    left_pole_top = [-half_width_length + 0.3, 0, net_height_sides]
-    left_pole_bottom = [-half_width_length + 0.3, 0, 0]
+    left_pole_top = [-half_court_width + 0.3, 0, net_height_sides]
+    left_pole_bottom = [-half_court_width + 0.3, 0, 0]
 
     # middle_net_top = [half_width_length, half_court_length, net_height_middle]
     # middle_net_bottom = [half_width_length, half_court_length, 0]
@@ -66,8 +66,8 @@ def find_poles_and_corners_world():
 
     # right_pole_top = [court_width - 0.3, half_court_length, net_height_sides]
     # right_pole_bottom = [court_width - 0.3, half_court_length, 0]
-    right_pole_top = [half_width_length - 0.3, 0, net_height_sides]
-    right_pole_bottom = [half_width_length - 0.3, 0, 0]
+    right_pole_top = [half_court_width - 0.3, 0, net_height_sides]
+    right_pole_bottom = [half_court_width - 0.3, 0, 0]
 
     return [left_pole_top, left_pole_bottom,
             middle_net_top, middle_net_bottom,
@@ -85,11 +85,16 @@ def find_camera_matrix(game: str, clip: str):
 
     width = 1280
     height = 720
-    fx = 100
-    fy = 100
-    cx = width / 2
-    cy = height / 2
-    camera_matrix_guess = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], dtype=np.float32)
+
+    # Approximate focal length based on image size and field of view
+    fov_degrees = 60  # Assuming a 60-degree field of view
+    focal_length_pixels = (width / 2) / np.tan(np.deg2rad(fov_degrees / 2))
+
+    # Initialize camera matrix guess with approximate focal length and principal point at image center
+    camera_matrix_guess = np.array([[focal_length_pixels, 0, width / 2],
+                                    [0, focal_length_pixels, height / 2],
+                                    [0, 0, 1]], dtype=np.float32)
+
     flags = cv2.CALIB_USE_INTRINSIC_GUESS
 
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(world_points, image_points, (1280, 720), camera_matrix_guess,
