@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import glob
 import pandas as pd
+import ast
+
+
 
 
 def find_court_corners(game: str, clip: str):
@@ -101,8 +104,8 @@ def find_camera_matrix(game: str, clip: str):
                                                        None, flags=flags)
 
     ground_points = [1,3,5,6,7,8,9]
-    image_points_homography = [image_points[i] for i in ground_points]
-    world_points_homography = [world_points[i] for i in ground_points]
+    image_points_homography = np.array([image_points[0][i] for i in ground_points])
+    world_points_homography = np.array([world_points[0][i] for i in ground_points])
     homography, _ = cv2.findHomography(image_points_homography, world_points_homography)
 
-    return ret, mtx.tolist(), dist.tolist(), rvecs[0].tolist(), tvecs[0].tolist(), homography
+    return ret, mtx.tolist(), dist.tolist(), rvecs[0].tolist(), tvecs[0].tolist(), homography.tolist()
