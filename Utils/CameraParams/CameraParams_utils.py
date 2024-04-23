@@ -100,7 +100,7 @@ def find_camera_matrix(game: str, clip: str):
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(world_points, image_points, (1280, 720), camera_matrix_guess,
                                                        None, flags=flags)
 
-    ground_points = [1,3,56,7,8,9]
+    ground_points = [1,3,5,6,7,8,9]
     image_points_homography = [image_points[i] for i in ground_points]
     world_points_homography = [world_points[i] for i in ground_points]
     homography, _ = cv2.findHomography(image_points_homography, world_points_homography)
