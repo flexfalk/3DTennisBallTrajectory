@@ -290,7 +290,7 @@ def dataBatcher(winlen: int, n_split: int, stepsize: int, num_relax: int,
 
     paths_dict = dict()
 
-    test_games = ['game1', 'game2', 'game8']
+    test_games = ['game1', 'game8']
 
     test_paths = []
     _train_paths = []
