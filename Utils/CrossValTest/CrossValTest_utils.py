@@ -97,7 +97,8 @@ def dataBatcher_test(winlen: int, stepsize: int, num_relax: int,
 
 
 # Utility for running experiments.
-def run_experiment_cross_val(filepath, X_train, Y_train, X_val, Y_val, epochs, early_stopping_patience=10,
+def run_experiment_cross_val(filepath, X_train, Y_train, X_val, Y_val, epochs, only_hits,
+                             early_stopping_patience=10,
                              n_features=70,
                              num_rnn_layers=2, num_rnn_units=28, n_classes=2, winlen=14, num_relax=6, dropout=0.4,
                              val_paths=[],
@@ -160,8 +161,12 @@ def run_experiment_cross_val(filepath, X_train, Y_train, X_val, Y_val, epochs, e
     true_bounces_only = np.where(Y_val == 1, 0, Y_val)
     true_bounces_only = np.where(true_bounces_only == 2, 1, true_bounces_only)
 
-    missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
-    missing_bounces, wrong_bounces, overlap_bounces = custom_evaluation_hits(true_bounces_only, preds_bounces_only)
+    if only_hits:
+        missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
+        missing_bounces, wrong_bounces, overlap_bounces = 0, 0, 0
+    else:
+        missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
+        missing_bounces, wrong_bounces, overlap_bounces = custom_evaluation_hits(true_bounces_only, preds_bounces_only)
 
     conf_matrix = confusion_matrix(Y_val, preds)
 
@@ -275,7 +280,8 @@ def cross_val(winlen: int, stepsize: int, num_relax: int,
                                                        winlen=winlen,
                                                        num_relax=num_relax,
                                                        val_paths=val_paths,
-                                                       class_weights=class_weights)
+                                                       class_weights=class_weights,
+                                                       only_hits=only_hits)
 
         return_dicts.append(return_metrics)
 
