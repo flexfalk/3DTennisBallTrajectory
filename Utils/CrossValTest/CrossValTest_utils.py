@@ -390,7 +390,8 @@ def run_and_save(folder_name: str, winlen: int, stepsize: int, num_relax: int,
                                                    n_classes=n_classes,
                                                    winlen=winlen,
                                                    num_relax=num_relax,
-                                                   class_weights=class_weights)
+                                                   class_weights=class_weights,
+                                                   only_hits=only_hits)
 
     # Make test results on game basis
 
