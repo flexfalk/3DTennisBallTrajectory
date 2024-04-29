@@ -404,8 +404,12 @@ def run_and_save(folder_name: str, winlen: int, stepsize: int, num_relax: int,
         true_bounces_only = np.where(y_game == 1, 0, y_game)
         true_bounces_only = np.where(true_bounces_only == 2, 1, true_bounces_only)
 
-        missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
-        missing_bounces, wrong_bounces, overlap_bounces = custom_evaluation_hits(true_bounces_only, preds_bounces_only)
+        if only_hits:
+            missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
+            missing_bounces, wrong_bounces, overlap_bounces = 0, 0, 0
+        else:
+            missing_hits, wrong_hits, overlap_hits = custom_evaluation_hits(true_hits_only, preds_hits_only)
+            missing_bounces, wrong_bounces, overlap_bounces = custom_evaluation_hits(true_bounces_only, preds_bounces_only)
 
         game_dict = {'accuracy': accuracy,
                      'f1': f1,
