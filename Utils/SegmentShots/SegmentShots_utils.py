@@ -181,9 +181,9 @@ def extract_shot_WASB(game: str, clip: str, start_frame: int, end_frame: int):
     return (df_WASB['ball_x'].tolist(), df_WASB['ball_y'].tolist()), (
     df_true['x-coordinate'].tolist(), df_true['y-coordinate'].tolist())
 
-def cool_plotter(preds, y_true, modelName):
 
-    acc =  accuracy_score(y_true, preds)
+def cool_plotter(preds, y_true, modelName):
+    acc = accuracy_score(y_true, preds)
     f1 = f1_score(y_true, preds, average='macro')
     yss = [preds, y_true]
     tickslabels = ["predicted", "true"]
@@ -196,26 +196,29 @@ def cool_plotter(preds, y_true, modelName):
 
     for j in range(2):
         q = get_hits(yss[j])
+        for i in range(len(q["bounce"]["start"])):
+            start = q["bounce"]["start"][i]
+            end = q["bounce"]["end"][i]
+            width = end - start
+            if j == 1 and i == len(q["bounce"]["start"]) - 1:
+                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red',
+                         alpha=alphas[j], label="bounce")
+            else:
+                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red',
+                         alpha=alphas[j])
+
+    for j in range(2):
+        q = get_hits(yss[j])
 
         for i in range(len(q["hit"]["start"])):
             start = q["hit"]["start"][i]
             end = q["hit"]["end"][i]
-            width = end-start
-            if j == 1 and i == len(q["hit"]["start"])-1:
-                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j], label="hit")
+            width = end - start
+            if j == 1 and i == len(q["hit"]["start"]) - 1:
+                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j],
+                         label="hit")
             else:
                 plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j])
-
-    for j in range(2):
-        q = get_hits(yss[j])
-        for i in range(len(q["bounce"]["start"])):
-            start = q["bounce"]["start"][i]
-            end = q["bounce"]["end"][i]
-            width = end-start
-            if j == 1 and i == len(q["bounce"]["start"])-1:
-                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j], label="bounce")
-            else:
-                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j])
 
     # Create a list of x-coordinates for the bars
     x = list(range(len(preds)))
@@ -224,12 +227,17 @@ def cool_plotter(preds, y_true, modelName):
 
     # Set the limits of the x-axis and y-axis
     plt.xlim(-0.5, len(preds))
+    plt.xlabel("frame number")
     # plt.ylim(0.5, 3.5)
     # Remove the y-axis ticks and labels
     plt.yticks(["hit predicted", "hit true", "bounce predicted", "bounce true"])
     # plt.ylabel(' ')
-    plt.title(modelName + " - Acc :" +  str(round(acc, 2)) + " and F1: " + str(round(f1, 2)))
-    plt.legend()
+    plt.title(modelName + " - Acc :" + str(round(acc, 2)) + " and F1: " + str(round(f1, 2)))
+    #     plt.legend()
+    plt.legend(reversed(plt.legend().legendHandles), ["hit", "bounce"])
+
+    plt.tight_layout()
+
     plt.savefig("duel21.png")
 
     plt.show()
