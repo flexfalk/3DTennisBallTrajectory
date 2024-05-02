@@ -223,7 +223,7 @@ def cool_plotter(preds, y_true, modelName):
     # y = [i if pred_label[i] in [1,2] else None for i in x]
 
     # Set the limits of the x-axis and y-axis
-    plt.xlim(-0.5, len(preds)+100)
+    plt.xlim(-0.5, len(preds))
     # plt.ylim(0.5, 3.5)
     # Remove the y-axis ticks and labels
     plt.yticks(["hit predicted", "hit true", "bounce predicted", "bounce true"])
