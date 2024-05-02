@@ -11,7 +11,7 @@ from tensorflow.keras.models import load_model, save_model
 
 from Utils.HyperparameterSearch.GRU import get_GRU
 
-from Utils.HyperparameterSearch.HyperParameter_utils import batch_X, window, batch_Y, min_max_norm, preprocess
+from Utils.HyperparameterSearch.HyperParameter_utils import batch_X, window, batch_Y, min_max_norm, preprocess, find_components, find_component_intersections
 
 def batch_duel(df: pd.DataFrame, winlen: int, stepsize: int,
                num_relax: int, remove_key_points: bool, corners: bool):
@@ -48,30 +48,32 @@ def modify_Y_inference(Y_inference: np.array, winlen, num_relax) -> np.array:
     return equalized_Y
 
 
-def load_GRU(model_path):
-    #     model_path = r"C:\Users\sofu0\PycharmProjects\BadmintonTDK-SoGuMo\models\GRU\best\model"
+# def load_GRU(model_path):
+#     #     model_path = r"C:\Users\sofu0\PycharmProjects\BadmintonTDK-SoGuMo\models\GRU\best\model"
+#
+#     n_features = 50
+#     num_rnn_layers = 8
+#     num_rnn_units = 32
+#     dropout = 0.1
+#     n_classes = 3
+#     winlen = 21
+#
+#     GRU = get_GRU(num_rnn_layers=num_rnn_layers, num_rnn_units=num_rnn_units, dropout=dropout, winlen=winlen,
+#                   n_classes=n_classes, n_features=n_features)
+#     GRU.load_weights(model_path)
+#
+#     return GRU
 
-    n_features = 50
-    num_rnn_layers = 8
-    num_rnn_units = 32
-    dropout = 0.1
-    n_classes = 3
-    winlen = 21
 
+def return_predictions(data_path, model_path, num_rnn_layers, num_rnn_units, n_classes, n_features, dropout, winlen,
+                       num_relax):
     GRU = get_GRU(num_rnn_layers=num_rnn_layers, num_rnn_units=num_rnn_units, dropout=dropout, winlen=winlen,
                   n_classes=n_classes, n_features=n_features)
     GRU.load_weights(model_path)
 
-    return GRU
-
-
-def return_predictions(data_path, model_path, winlen, num_relax, remove_key_points=True):
-    # GRU = load_GRU(model_path)
-    GRU = load_model(model_path)
-
     data = pd.read_csv(data_path)
     X_inference, _ = batch_duel(df=data, winlen=winlen, stepsize=1,
-                                num_relax=num_relax, remove_key_points=remove_key_points, corners=False)
+                                num_relax=num_relax, remove_key_points=False, corners=False)
 
     probabilities = GRU.predict(X_inference)
     pred_label = np.argmax(probabilities, axis=1)
@@ -265,3 +267,79 @@ def show_shot_on_video(df, shot_id, video_path):
         output_video.write(img)
 
     output_video.release()
+
+
+def custom_evaluation_hits_new(y_true, preds):
+    y_components = find_components(y_true)
+    y_new_components = y_components.copy()
+
+    preds_components = find_components(preds)
+    preds_new_components = preds_components.copy()
+
+    intersections = find_component_intersections(y_components, preds_components)
+
+    overlaps = []
+    #     print(intersections)
+
+    for intersection in intersections:
+        #         print(intersection)
+        # find missing hits
+        if intersection[0] in y_new_components:
+            y_new_components.remove(intersection[0])
+
+        if intersection[1] in preds_new_components:
+            preds_new_components.remove(intersection[1])
+
+        # find wrong hits
+        #         preds_new_components.remove(intersection[1])
+
+        # find overlap
+        _intersection = len(intersection[2])
+        _union = len(set(intersection[0] + intersection[1]))
+        overlaps.append(_intersection / _union)
+
+    frac_missing_hits = len(y_new_components) / len(y_components)
+
+    if len(preds_components):
+        frac_wrong_hits = len(preds_new_components) / len(preds_components)
+    else:
+        frac_wrong_hits = 1
+
+    if not overlaps:
+        overlaps = 0
+
+    return len(y_new_components), len(y_components), len(preds_new_components), len(
+        preds_components), _intersection, _union
+
+
+def custom_evaluation_with_clip(y_true, preds):
+    hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n, bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n = custom_evaluation_3way(
+        y_true, preds)
+
+    return hits_missed / hits_n, hits_wrong / predhits_n, intersections_hits_n / unions_hits_n, bounce_missed / bounce_n, bounce_wrong / predbounce_n, intersections_bounce_n / unions_bounce_n
+
+
+def custom_evaluation_3way(y_true, preds):
+    y_true = np.array(y_true)
+    preds_hits_only = np.where(preds == 2, 0, preds)
+
+    true_hits_only = np.where(y_true == 2, 0, y_true)
+
+    preds_bounces_only = np.where(preds == 1, 0, preds)
+    #     print(preds_bounces_only)
+    preds_bounces_only = np.where(preds_bounces_only == 2, 1, preds_bounces_only)
+    #     print("Y_true", y_true)
+    true_bounces_only = np.where(y_true == 1, 0, y_true)
+    #     print("true bounces, only twos!!",true_bounces_only)
+    true_bounces_only = np.where(true_bounces_only == 2, 1, true_bounces_only)
+
+    #     print(true_bounces_only)
+
+    hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n = custom_evaluation_hits_new(
+        true_hits_only, preds_hits_only)
+
+    bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n = custom_evaluation_hits_new(
+        true_bounces_only, preds_bounces_only)
+
+
+    return hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n, bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n

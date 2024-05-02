@@ -3,7 +3,7 @@ from sklearn.metrics import accuracy_score
 
 
 def get_GRU(num_rnn_layers, num_rnn_units,
-            dropout, winlen, n_classes, n_features, num_relax):
+            dropout, winlen, n_classes, n_features):
     features_input = keras.Input((winlen, n_features))
 
     x = keras.layers.Dense(32, activation="relu")(features_input)
