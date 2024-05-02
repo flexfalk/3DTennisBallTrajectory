@@ -11,7 +11,7 @@ from tensorflow.keras.models import load_model, save_model
 
 from Utils.HyperparameterSearch.GRU import get_GRU
 
-from Utils.HyperparameterSearch.HyperParameter_utils import batch_X, window, batch_Y, min_max_norm, preprocess
+from Utils.HyperparameterSearch.HyperParameter_utils import batch_X, window, batch_Y, min_max_norm, preprocess, custom_evaluation_hits
 
 def batch_duel(df: pd.DataFrame, winlen: int, stepsize: int,
                num_relax: int, remove_key_points: bool, corners: bool):
@@ -267,3 +267,36 @@ def show_shot_on_video(df, shot_id, video_path):
         output_video.write(img)
 
     output_video.release()
+
+
+def custom_evaluation_with_clip(y_true, preds):
+    hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n, bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n = custom_evaluation_3way(
+        y_true, preds)
+
+    return hits_missed / hits_n, hits_wrong / predhits_n, intersections_hits_n / unions_hits_n, bounce_missed / bounce_n, bounce_wrong / predbounce_n, intersections_bounce_n / unions_bounce_n
+
+
+def custom_evaluation_3way(y_true, preds):
+    y_true = np.array(y_true)
+    preds_hits_only = np.where(preds == 2, 0, preds)
+
+    true_hits_only = np.where(y_true == 2, 0, y_true)
+
+    preds_bounces_only = np.where(preds == 1, 0, preds)
+    #     print(preds_bounces_only)
+    preds_bounces_only = np.where(preds_bounces_only == 2, 1, preds_bounces_only)
+    #     print("Y_true", y_true)
+    true_bounces_only = np.where(y_true == 1, 0, y_true)
+    #     print("true bounces, only twos!!",true_bounces_only)
+    true_bounces_only = np.where(true_bounces_only == 2, 1, true_bounces_only)
+
+    #     print(true_bounces_only)
+
+    hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n = custom_evaluation_hits(
+        true_hits_only, preds_hits_only)
+
+    bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n = custom_evaluation_hits(
+        true_bounces_only, preds_bounces_only)
+
+
+    return hits_missed, hits_n, hits_wrong, predhits_n, intersections_hits_n, unions_hits_n, bounce_missed, bounce_n, bounce_wrong, predbounce_n, intersections_bounce_n, unions_bounce_n
