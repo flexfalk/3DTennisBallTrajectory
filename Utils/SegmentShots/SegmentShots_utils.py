@@ -202,9 +202,9 @@ def cool_plotter(preds, y_true, modelName):
             end = q["hit"]["end"][i]
             width = end-start
             if j == 1 and i == len(q["hit"]["start"])-1:
-                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j], label="player near")
+                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j], label="hit")
             else:
-                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j])
+                plt.barh(["hit " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j])
 
     for j in range(2):
         q = get_hits(yss[j])
@@ -213,9 +213,9 @@ def cool_plotter(preds, y_true, modelName):
             end = q["bounce"]["end"][i]
             width = end-start
             if j == 1 and i == len(q["bounce"]["start"])-1:
-                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j], label="player far")
+                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j], label="bounce")
             else:
-                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='blue', alpha=alphas[j])
+                plt.barh(["bounce " + tickslabels[j]], width=width, height=0.3, left=start, color='red', alpha=alphas[j])
 
     # Create a list of x-coordinates for the bars
     x = list(range(len(preds)))
