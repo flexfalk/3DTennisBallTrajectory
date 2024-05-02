@@ -10,7 +10,6 @@ import os
 from tensorflow.keras.models import load_model, save_model
 
 from Utils.HyperparameterSearch.GRU import get_GRU
-
 from Utils.HyperparameterSearch.HyperParameter_utils import batch_X, window, batch_Y, min_max_norm, preprocess, find_components, find_component_intersections
 
 def batch_duel(df: pd.DataFrame, winlen: int, stepsize: int,
@@ -185,7 +184,7 @@ def extract_shot_WASB(game: str, clip: str, start_frame: int, end_frame: int):
 def cool_plotter(preds, y_true, modelName):
 
     acc =  accuracy_score(y_true, preds)
-    f1 = f1_score(y_true, preds, average='weighted')
+    f1 = f1_score(y_true, preds, average='macro')
     yss = [preds, y_true]
     tickslabels = ["predicted", "true"]
 
