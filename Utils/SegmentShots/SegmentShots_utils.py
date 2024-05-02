@@ -48,30 +48,32 @@ def modify_Y_inference(Y_inference: np.array, winlen, num_relax) -> np.array:
     return equalized_Y
 
 
-def load_GRU(model_path):
-    #     model_path = r"C:\Users\sofu0\PycharmProjects\BadmintonTDK-SoGuMo\models\GRU\best\model"
+# def load_GRU(model_path):
+#     #     model_path = r"C:\Users\sofu0\PycharmProjects\BadmintonTDK-SoGuMo\models\GRU\best\model"
+#
+#     n_features = 50
+#     num_rnn_layers = 8
+#     num_rnn_units = 32
+#     dropout = 0.1
+#     n_classes = 3
+#     winlen = 21
+#
+#     GRU = get_GRU(num_rnn_layers=num_rnn_layers, num_rnn_units=num_rnn_units, dropout=dropout, winlen=winlen,
+#                   n_classes=n_classes, n_features=n_features)
+#     GRU.load_weights(model_path)
+#
+#     return GRU
 
-    n_features = 50
-    num_rnn_layers = 8
-    num_rnn_units = 32
-    dropout = 0.1
-    n_classes = 3
-    winlen = 21
 
+def return_predictions(data_path, model_path, num_rnn_layers, num_rnn_units, n_classes, n_features, dropout, winlen,
+                       num_relax):
     GRU = get_GRU(num_rnn_layers=num_rnn_layers, num_rnn_units=num_rnn_units, dropout=dropout, winlen=winlen,
                   n_classes=n_classes, n_features=n_features)
     GRU.load_weights(model_path)
 
-    return GRU
-
-
-def return_predictions(data_path, model_path, winlen, num_relax, remove_key_points=True):
-    # GRU = load_GRU(model_path)
-    GRU = load_model(model_path)
-
     data = pd.read_csv(data_path)
     X_inference, _ = batch_duel(df=data, winlen=winlen, stepsize=1,
-                                num_relax=num_relax, remove_key_points=remove_key_points, corners=False)
+                                num_relax=num_relax, remove_key_points=False, corners=False)
 
     probabilities = GRU.predict(X_inference)
     pred_label = np.argmax(probabilities, axis=1)
