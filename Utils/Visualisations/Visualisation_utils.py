@@ -151,7 +151,7 @@ def plot_tennis_court(ax):
     #     # Backline
     ax.plot([-half_court_width, half_court_width], [half_court_length, half_court_length], [0, 0], color='black')
 
-def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: torch.tensor, labels : torch.tensor):
+def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: torch.tensor, labels : torch.tensor, with_label = True):
 
     court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
 
@@ -164,7 +164,8 @@ def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: t
         s = (i + 1) * 2
         #             print(s)
         axs[0].scatter(projected_path[i, 0], projected_path[i, 1], s=s, color="green", label="Reprojected Shot")
-        axs[0].scatter(labels[i, 0], labels[i, 1], s=s, color="red", label="True Shot")
+        if with_label:
+            axs[0].scatter(labels[i, 0], labels[i, 1], s=s, color="red", label="True Shot")
         axs[0].set_title("Reprojection on real shot")
 
     # Plot the trajectory
