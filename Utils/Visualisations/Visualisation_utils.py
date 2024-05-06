@@ -1,7 +1,9 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from Utils.FilterPoses.FilterPoses_utils import find_court_corners
+import torch
 
 def inference_on_clip(clip_path, preds=None, ball=True, pose=True, hits=True, whitescreen=True, corners=True,
                       darkmode=True):
@@ -129,31 +131,115 @@ def inference_on_clip(clip_path, preds=None, ball=True, pose=True, hits=True, wh
 
     result.release()
 
-    def plot_tennis_court(ax):
+def plot_tennis_court(ax):
 
 
-        # Tennis court dimensions
-        court_length = 23.77
-        court_width = 10.97
-        half_court_length = court_length / 2
-        half_court_width = court_width / 2
-        net_height_middle = 0.91
-        net_height_sides = 1.067
+    # Tennis court dimensions
+    court_length = 23.77
+    court_width = 10.97
+    half_court_length = court_length / 2
+    half_court_width = court_width / 2
+    net_height_middle = 0.91
+    net_height_sides = 1.067
 
-        # Find corners
-        # left_bottom_corner = [0, 0, 0]
-        # right_bottom_corner = [court_width, 0, 0]
-        #     left_bottom_corner = [-half_width_length, -half_court_length, 0]
-        #     right_bottom_corner = [half_width_length, -half_court_length, 0]
+    # Find corners
+    # left_bottom_corner = [0, 0, 0]
+    # right_bottom_corner = [court_width, 0, 0]
+    #     left_bottom_corner = [-half_width_length, -half_court_length, 0]
+    #     right_bottom_corner = [half_width_length, -half_court_length, 0]
 
-        # Baseline
-        ax.plot([-half_court_width, half_court_width], [-half_court_length, -half_court_length], [0, 0], color='black')
-        # Sidelines
-        ax.plot([-half_court_width, -half_court_width], [-half_court_length, half_court_length], [0, 0], color='black')
-        ax.plot([half_court_width, half_court_width], [-half_court_length, half_court_length], [0, 0], color='black')
-        #     # Service lines
-        ax.plot([-half_court_width, half_court_width], [0, 0], [0, 0], color='black')
-        #     # Center service line
-        # #     ax.plot([court_length / 2, court_length / 2], [0, court_width], [0, 0], color='black')
-        #     # Backline
-        ax.plot([-half_court_width, half_court_width], [half_court_length, half_court_length], [0, 0], color='black')
+    # Baseline
+    ax.plot([-half_court_width, half_court_width], [-half_court_length, -half_court_length], [0, 0], color='black')
+    # Sidelines
+    ax.plot([-half_court_width, -half_court_width], [-half_court_length, half_court_length], [0, 0], color='black')
+    ax.plot([half_court_width, half_court_width], [-half_court_length, half_court_length], [0, 0], color='black')
+    #     # Service lines
+    ax.plot([-half_court_width, half_court_width], [0, 0], [0, 0], color='black')
+    #     # Center service line
+    # #     ax.plot([court_length / 2, court_length / 2], [0, court_width], [0, 0], color='black')
+    #     # Backline
+    ax.plot([-half_court_width, half_court_width], [half_court_length, half_court_length], [0, 0], color='black')
+
+def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: torch.tensor):
+
+
+    court_length = 23.77
+    court_width = 10.97
+    half_court_length = court_length / 2
+    half_court_width = court_width / 2
+    net_height_middle = 0.91
+    net_height_sides = 1.067
+
+    img = cv2.imread(image_path)
+
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+
+    axs[0].imshow(img)
+    for i in range(len(projected_path)):
+        s = (i + 1) * 2
+        #             print(s)
+        axs[0].scatter(projected_path[i, 0], projected_path[i, 1], s=s, color="green", label="Reprojected Shot")
+        #         axs[0].scatter(labels[i, 0], labels[i, 1], s=s, color="red", label="True Shot")
+        axs[0].set_title("Reprojection on real shot")
+
+    # Plot the trajectory
+    axs[1] = fig.add_subplot(122, projection='3d')
+    for i in range(len(trajectory_3d)):
+        s = (i + 1) * 2  # Increase size with each iteration
+        color = 'green' if trajectory_3d[i, 2] > 0 else 'black'
+        axs[1].scatter(trajectory_3d[i, 0], trajectory_3d[i, 1], trajectory_3d[i, 2], s=s, c=color)
+
+    axs[1].set_xlabel('X')
+    axs[1].set_ylabel('Y')
+    axs[1].set_zlabel('Z')
+    axs[1].set_title('Tennis Shot Trajectory with Scatter Points')
+    axs[1].legend()
+    plot_tennis_court(axs[1])
+
+    court_length = 23.77  # meters
+    court_width = 10.97  # meters
+
+    axs[1].set_xlim(-half_court_length - 2, half_court_length + 2)  # Set x-axis limits
+    axs[1].set_ylim(-half_court_length - 2, half_court_length + 2)  # Set y-axis limits
+    axs[1].set_zlim(-1, 4)  # Set z-axis limits
+
+    #         axs[1].view_init(elev=1, azim=1)  # Change the elevation (up-down) and azimuth (left-right) angles
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+
+    plt.show()
+
+    fig2, axs2 = plt.subplots(1, 2, figsize=(10, 5))
+
+    angles = [(0, 0), (90, -90)]
+    for k in range(2):
+        #             print(k)
+        angle = angles[k]
+
+        # Plot the trajectory
+        axs2[k] = fig2.add_subplot(1, 2, k + 1, projection='3d')
+        for i in range(len(trajectory_3d)):
+            #                 print(s)
+            s = (i + 1) * 2  # Increase size with each iteration
+            color = 'green' if trajectory_3d[i, 2] > 0 else 'black'
+            axs2[k].scatter(trajectory_3d[i, 0], trajectory_3d[i, 1], trajectory_3d[i, 2], s=s, c=color)
+
+        axs2[k].set_xlabel('X')
+        axs2[k].set_ylabel('Y')
+        axs2[k].set_zlabel('Z')
+        axs2[k].set_title('Tennis Shot Trajectory with Scatter Points')
+        axs2[k].legend()
+        plot_tennis_court(axs2[k])
+
+        court_length = 23.77  # meters
+        court_width = 10.97  # meters
+
+        axs2[k].set_xlim(-half_court_length - 2, half_court_length + 2)  # Set x-axis limits
+        axs2[k].set_ylim(-half_court_length - 2, half_court_length + 2)  # Set y-axis limits
+        axs2[k].set_zlim(-1, 4)  # Set z-axis limits
+
+        axs2[k].view_init(elev=angle[0],
+                          azim=angle[1])  # Change the elevation (up-down) and azimuth (left-right) angles
+    plt.tight_layout()
+    plt.show()
