@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from Utils.FilterPoses.FilterPoses_utils import find_court_corners
 import torch
+from Utils.Reconstruction3D.Reconstruction3D_utils import get_court_dimension
 
 def inference_on_clip(clip_path, preds=None, ball=True, pose=True, hits=True, whitescreen=True, corners=True,
                       darkmode=True):
@@ -135,18 +136,8 @@ def plot_tennis_court(ax):
 
 
     # Tennis court dimensions
-    court_length = 23.77
-    court_width = 10.97
-    half_court_length = court_length / 2
-    half_court_width = court_width / 2
-    net_height_middle = 0.91
-    net_height_sides = 1.067
 
-    # Find corners
-    # left_bottom_corner = [0, 0, 0]
-    # right_bottom_corner = [court_width, 0, 0]
-    #     left_bottom_corner = [-half_width_length, -half_court_length, 0]
-    #     right_bottom_corner = [half_width_length, -half_court_length, 0]
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
 
     # Baseline
     ax.plot([-half_court_width, half_court_width], [-half_court_length, -half_court_length], [0, 0], color='black')
@@ -162,13 +153,7 @@ def plot_tennis_court(ax):
 
 def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: torch.tensor):
 
-
-    court_length = 23.77
-    court_width = 10.97
-    half_court_length = court_length / 2
-    half_court_width = court_width / 2
-    net_height_middle = 0.91
-    net_height_sides = 1.067
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
 
     img = cv2.imread(image_path)
 

@@ -126,14 +126,20 @@ def project_points_torch(trajectory: torch.tensor, rotation_matrix, translation_
     return u_and_v.float()
 
 
-def create_synthetic_shots(N: int):
-
+def get_court_dimension():
     court_length = 23.77
     court_width = 10.97
     half_court_length = court_length / 2
     half_court_width = court_width / 2
     net_height_middle = 0.91
     net_height_sides = 1.067
+
+    return court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides
+
+
+def create_synthetic_shots(N: int):
+
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
 
     N_front_players_shots = int(N / 2)
     N_back_player_shots = int(N / 2)
