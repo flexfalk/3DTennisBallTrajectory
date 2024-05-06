@@ -1,6 +1,7 @@
 import pandas as pd
 import ast
 import torch
+import numpy as np
 
 def parse_list(string):
     try:
@@ -123,3 +124,47 @@ def project_points_torch(trajectory: torch.tensor, rotation_matrix, translation_
     u_and_v = f * bro + c
 
     return u_and_v.float()
+
+
+def create_synthetic_shots(N: int):
+
+    court_length = 23.77
+    court_width = 10.97
+    half_court_length = court_length / 2
+    half_court_width = court_width / 2
+    net_height_middle = 0.91
+    net_height_sides = 1.067
+
+    N_front_players_shots = int(N / 2)
+    N_back_player_shots = int(N / 2)
+
+    front_player_shots = []
+    back_player_shots = []
+
+
+
+    for i in range(N_front_players_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(-half_court_length - 1, - 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(10, 40)
+        vz = np.random.uniform(0, 5)
+
+        init_params = [x, y, z, vx, vy, vz]
+        front_player_shots.append(init_params)
+
+    for i in range(N_back_player_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(1, half_court_length + 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(-10, -40)
+        vz = np.random.uniform(0, 5)
+
+        init_params = [x, y, z, vx, vy, vz]
+        back_player_shots.append(init_params)
+
+    return front_player_shots + back_player_shots
