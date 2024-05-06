@@ -174,3 +174,61 @@ def create_synthetic_shots(N: int):
         back_player_shots.append(init_params)
 
     return front_player_shots + back_player_shots
+
+
+def project_points_numpy(trajectory, rotation_matrix, translation_vector, camera_matrix, distortion_coeffs):
+    # Convert inputs to double precision
+    trajectory = np.array(trajectory, dtype=np.float64)
+    camera_matrix = np.array(camera_matrix, dtype=np.float64)
+    distortion_coeffs = np.array(distortion_coeffs[0], dtype=np.float64)
+
+    num_rows = trajectory.shape[0]
+    # Create a column matrix of ones with the same number of rows as the original matrix
+    ones_column = np.ones((num_rows, 1), dtype=np.float64)
+
+    # Concatenate the original matrix and the ones column along the second dimension (columns)
+    trajectory = np.concatenate((trajectory, ones_column), axis=1)
+
+    rot_and_trans = np.concatenate((rotation_matrix, translation_vector), axis=1)
+    #     print(rot_and_trans.shape)
+    foo = np.matmul(rot_and_trans, trajectory.T).T
+
+    fx = camera_matrix[0, 0]
+    fy = camera_matrix[1, 1]
+
+    cx = camera_matrix[0, 2]
+    cy = camera_matrix[1, 2]
+
+    f = np.array([fx, fy], dtype=np.float64)
+    c = np.array([cx, cy], dtype=np.float64)
+
+    x_and_y = foo[:, 0:2]
+    z = foo[:, 2].reshape(-1, 1)
+
+    z = np.concatenate((z, z), axis=1)
+
+    points_2d = f * x_and_y / z + c
+
+    x1_and_y1 = x_and_y / z
+
+    r2 = x1_and_y1[:, 0] ** 2 + x1_and_y1[:, 1] ** 2
+
+    r4 = r2 ** 2
+    r6 = r2 ** 3
+    radial = 1.0 + distortion_coeffs[0] * r2 + distortion_coeffs[1] * r4 + distortion_coeffs[4] * r6
+
+    tangential_x = 2.0 * distortion_coeffs[2] * x1_and_y1[:, 0] * x1_and_y1[:, 1] + distortion_coeffs[3] * (
+                r2 + 2.0 * x1_and_y1[:, 0] ** 2)
+
+    tangential_y = distortion_coeffs[2] * (r2 + 2.0 * x1_and_y1[:, 1] ** 2) + 2.0 * distortion_coeffs[3] * x1_and_y1[:,
+                                                                                                           0] * x1_and_y1[
+                                                                                                                :, 1]
+
+    x2 = x1_and_y1[:, 0] * radial + tangential_x
+    y2 = x1_and_y1[:, 1] * radial + tangential_y
+
+    bro = np.concatenate((x2.reshape(-1, 1), y2.reshape(-1, 1)), axis=1)
+
+    u_and_v = f * bro + c
+
+    return u_and_v.astype(np.float32)
