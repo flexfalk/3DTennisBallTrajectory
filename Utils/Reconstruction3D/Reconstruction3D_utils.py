@@ -277,3 +277,25 @@ def project_single_point_numpy(point, rotation_matrix, translation_vector, camer
     v_corrected = (fy * y_corrected) + cy
 
     return np.array([u_corrected, v_corrected], dtype=np.float32)
+
+
+def mse(vector1, vector2):
+    """
+    Calculate the Mean Squared Error (MSE) between two vectors of size N x 2.
+
+    Args:
+    - vector1: First vector of size N x 2.
+    - vector2: Second vector of size N x 2.
+
+    Returns:
+    - mse: Mean Squared Error between the two vectors.
+    """
+    # Compute squared differences
+    squared_diff = np.square(vector1 - vector2)
+
+    # Calculate mean squared error
+    mse = np.mean(squared_diff)
+
+    rmse = np.sqrt(mse)
+
+    return rmse
