@@ -232,3 +232,48 @@ def project_points_numpy(trajectory, rotation_matrix, translation_vector, camera
     u_and_v = f * bro + c
 
     return u_and_v.astype(np.float32)
+
+
+
+def project_single_point_numpy(point, rotation_matrix, translation_vector, camera_matrix, distortion_coeffs):
+    # Convert inputs to double precision
+    point = np.array(point, dtype=np.float64)
+    camera_matrix = np.array(camera_matrix, dtype=np.float64)
+
+    distortion_coeffs = np.array(distortion_coeffs[0], dtype=np.float64)
+
+    # Add homogeneous coordinate (w = 1)
+    point = np.append(point, 1)
+
+    # Concatenate rotation matrix and translation vector
+    rot_and_trans = np.concatenate((rotation_matrix, translation_vector), axis=1)
+
+    # Project 3D point into 2D image plane
+    point_homogeneous = np.matmul(rot_and_trans, point)
+    x, y, z = point_homogeneous
+
+    # Intrinsic parameters
+    fx = camera_matrix[0, 0]
+    fy = camera_matrix[1, 1]
+    cx = camera_matrix[0, 2]
+    cy = camera_matrix[1, 2]
+
+    # Normalize
+    u = (fx * x / z) + cx
+    v = (fy * y / z) + cy
+
+    # Distortion correction
+    r2 = (x / z) ** 2 + (y / z) ** 2
+    radial = 1.0 + distortion_coeffs[0] * r2 + distortion_coeffs[1] * r2 ** 2 + distortion_coeffs[4] * r2 ** 3
+    tangential_x = 2.0 * distortion_coeffs[2] * (x / z) * (y / z) + distortion_coeffs[3] * (r2 + 2.0 * (x / z) ** 2)
+    tangential_y = distortion_coeffs[2] * (r2 + 2.0 * (y / z) ** 2) + 2.0 * distortion_coeffs[3] * (x / z) * (y / z)
+
+    # Apply distortion correction
+    x_corrected = (x / z) * radial + tangential_x
+    y_corrected = (y / z) * radial + tangential_y
+
+    # Final pixel coordinates
+    u_corrected = (fx * x_corrected) + cx
+    v_corrected = (fy * y_corrected) + cy
+
+    return np.array([u_corrected, v_corrected], dtype=np.float32)
