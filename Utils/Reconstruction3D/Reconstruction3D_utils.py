@@ -52,7 +52,7 @@ def create_3d_trajectory(output, N, until_ground_hit=False):
     positions = position.clone().view(1, 3)
 
     if until_ground_hit:
-        while position[2] > 0:
+        while position[0, 2] > 0:
             v_norm = torch.norm(v)
 
             a = g - 1 * (D / m) * v_norm * v
