@@ -33,7 +33,7 @@ def custom_collate(batch):
         rotation_matrix), padded_poses, player1_homography, player2_homography, shot_id
 
 
-def create_3d_trajectory(output, N):
+def create_3d_trajectory(output, N, until_ground_hit=False):
     position = output[:, 0:3]
     v = output[:, 3:6]
 
@@ -51,13 +51,23 @@ def create_3d_trajectory(output, N):
     # positions = torch.tensor(position, device=output.device).clone().view(1, 3)
     positions = position.clone().view(1, 3)
 
-    for i in range(N_max - 1):
-        v_norm = torch.norm(v)
+    if until_ground_hit:
+        while position[2] > 0:
+            v_norm = torch.norm(v)
 
-        a = g - 1 * (D / m) * v_norm * v
-        v = v + a * delta_t
-        position = position + v * delta_t + 0.5 * a * delta_t ** 2
-        positions = torch.cat((positions, position.view(1, 3)), dim=0)
+            a = g - 1 * (D / m) * v_norm * v
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
+
+    else:
+        for i in range(N_max - 1):
+            v_norm = torch.norm(v)
+
+            a = g - 1 * (D / m) * v_norm * v
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
 
     indices = [i for i in range(0, len(positions), 3)]
     indexed_positions = positions[indices]
