@@ -309,3 +309,48 @@ def mse(vector1, vector2):
     rmse = np.sqrt(mse)
 
     return rmse
+
+
+def ball_hits_court(pred_traj, true_traj, homography_matrix):
+    """
+    This function dvivides the court in 12 square, three in width and 4 in height, meaning each half of the court consists of 6 squares.
+    The squares are numbered from top left going right.
+
+    pred_traj : the predicted 3D trajectory
+    true_traj : the true 2D trajectory
+    homography_matrix : the homography matrix for the given shot
+    return : a number determining which square of the field the true and predicted ball lands in
+    """
+
+    pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
+    true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
+
+    # Find homography for true 2d image coordinates
+    true_position = cv2.perspectiveTransform(true_position, np.array(homography_matrix)).squeeze()
+
+    # Define the boundaries of each square in real-world coordinates for back and front court
+    court_length = 23.77
+    half_length = court_length / 2
+    court_width = 10.97
+    half_width = court_width / 2
+    pred_square = -1
+    true_square = -1
+
+    boundaries_width = [-half_width, -half_width / 2, half_width / 2, half_width]
+    boundaries_length = [half_length, half_length / 2, 0, -half_length / 2, -half_length]
+
+    for i in range(len(boundaries_width) - 1):
+        if boundaries_width[i] < pred_position[0] <= boundaries_width[i + 1]:
+            for j in range(len(boundaries_length) - 1):
+                if boundaries_length[j] > pred_position[1] >= boundaries_length[j + 1]:
+                    pred_square = (j * 3) + i
+                    break
+
+    for i in range(len(boundaries_width) - 1):
+        if boundaries_width[i] < true_position[0] <= boundaries_width[i + 1]:
+            for j in range(len(boundaries_length) - 1):
+                if boundaries_length[j] > true_position[1] >= boundaries_length[j + 1]:
+                    true_square = (j * 3) + i
+                    break
+
+    return pred_square, true_square
