@@ -322,16 +322,16 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
     return : a number determining which square of the field the true and predicted ball lands in
     """
 
-    pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
-    true_position = 1
-    for i in range(len(true_traj)):
-        if true_position[0, i, -1] < 0:
+    # pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
+
+    pred_position = np.array(pred_traj)[0, -1]
+    for i in range(len(pred_traj)):
+        if pred_traj[i, -1] < 0:
             break
         else:
-            true_position = np.array(true_traj[0, i]).reshape(-1, 1, 2)
+            pred_position = np.array(pred_traj[i, 0:2])
 
-    # true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
-
+    true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
 
 
     # Find homography for true 2d image coordinates
