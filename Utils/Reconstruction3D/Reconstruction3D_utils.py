@@ -323,7 +323,16 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
     """
 
     pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
-    true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
+    true_position = 1
+    for i in range(len(true_traj)):
+        if true_position[0, i, -1] < 0:
+            break
+        else:
+            true_position = np.array(true_traj[0, i]).reshape(-1, 1, 2)
+
+    # true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
+
+
 
     # Find homography for true 2d image coordinates
     true_position = cv2.perspectiveTransform(true_position, np.array(homography_matrix)).squeeze()
