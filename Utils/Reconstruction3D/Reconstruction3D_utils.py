@@ -310,7 +310,7 @@ def mse(vector1, vector2):
 
     return rmse
 
-
+import cv2
 def ball_hits_court(pred_traj, true_traj, homography_matrix):
     """
     This function dvivides the court in 12 square, three in width and 4 in height, meaning each half of the court consists of 6 squares.
