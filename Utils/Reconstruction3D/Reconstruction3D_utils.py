@@ -375,7 +375,7 @@ def get_important_cam_params(game, clip, camera_params_train):
     rvecs = np.array(cam_parameters["rotation_vector"])
     rvecs = rvecs.reshape(3, 1)
     tvecs = np.array(cam_parameters["translation_vector"])
-    tvecs = tvecs.reshape(3, 1)
+    # tvecs = tvecs.reshape(3, 1)
     dist = np.array(cam_parameters["dist"])
 
     rotation_matrix, _ = cv2.Rodrigues(rvecs)
