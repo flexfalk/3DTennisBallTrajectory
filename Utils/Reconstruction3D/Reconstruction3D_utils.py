@@ -375,13 +375,13 @@ def get_important_cam_params(game, clip, camera_params_train):
     rvecs = np.array(cam_parameters["rotation_vector"])
     rvecs = rvecs.reshape(3, 1)
     tvecs = np.array(cam_parameters["translation_vector"])
-    # tvecs = tvecs.reshape(3, 1)
+    tvecs = tvecs.reshape(3, 1)
     dist = np.array(cam_parameters["dist"])
 
     rotation_matrix, _ = cv2.Rodrigues(rvecs)
 
     rot_and_trans = np.concatenate((rotation_matrix, tvecs), axis=1)
-    rot_and_trans.shape
+    # rot_and_trans.shape
 
     camProj = cam_mtx @ rot_and_trans
     homography = torch.tensor(eval(cam_parameters["homography_matrix"]), dtype=torch.float64)
