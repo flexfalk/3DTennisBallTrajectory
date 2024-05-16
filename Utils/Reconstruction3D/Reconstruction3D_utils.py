@@ -167,7 +167,7 @@ def create_synthetic_shots(N: int):
         z = np.random.uniform(0.1, 3)
 
         vx = np.random.uniform(-4, 4)
-        vy = np.random.uniform(10, 40)
+        vy = np.random.uniform(10, 30)
         vz = np.random.uniform(0, 5)
 
         init_params = [x, y, z, vx, vy, vz]
@@ -179,7 +179,7 @@ def create_synthetic_shots(N: int):
         z = np.random.uniform(0.1, 3)
 
         vx = np.random.uniform(-4, 4)
-        vy = np.random.uniform(-10, -40)
+        vy = np.random.uniform(-10, -30)
         vz = np.random.uniform(0, 5)
 
         init_params = [x, y, z, vx, vy, vz]
