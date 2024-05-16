@@ -2,6 +2,8 @@ import pandas as pd
 import ast
 import torch
 import numpy as np
+import cv2
+from sklearn.metrics import accuracy_score, f1_score
 
 def parse_list(string):
     try:
@@ -310,7 +312,7 @@ def mse(vector1, vector2):
 
     return rmse
 
-import cv2
+
 def ball_hits_court(pred_traj, true_traj, homography_matrix):
     """
     This function dvivides the court in 12 square, three in width and 4 in height, meaning each half of the court consists of 6 squares.
@@ -363,3 +365,48 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
                     break
 
     return pred_square, true_square
+
+
+def get_important_cam_params(game, clip, camera_params_train):
+    # find camera parameters
+    cam_parameters = \
+    camera_params_train[(camera_params_train["game"] == game) & (camera_params_train["clip"] == clip)].iloc[0]
+    cam_mtx = np.array(cam_parameters["camera_matrix"])
+    rvecs = np.array(cam_parameters["rotation_vector"])
+    rvecs = rvecs.reshape(3, 1)
+    tvecs = np.array(cam_parameters["translation_vector"])
+    tvecs = tvecs.reshape(3, 1)
+    dist = np.array(cam_parameters["dist"])
+
+    rotation_matrix, _ = cv2.Rodrigues(rvecs)
+
+    rot_and_trans = np.concatenate((rotation_matrix, tvecs), axis=1)
+    rot_and_trans.shape
+
+    camProj = cam_mtx @ rot_and_trans
+    homography = torch.tensor(eval(cam_parameters["homography_matrix"]), dtype=torch.float64)
+
+    return homography, rotation_matrix, tvecs, cam_mtx, dist
+
+def calculate_accuracy(group):
+    return accuracy_score(group['true_tiles'], group['predicted_tiles'])
+
+# Function to calculate F1 macro score
+def calculate_f1_macro(group):
+    return f1_score(group['true_tiles'], group['predicted_tiles'], average='macro')
+
+
+def euclidean_distance(vec1, vec2):
+    return np.linalg.norm(vec1 - vec2)
+
+
+def average_distance(list1, list2):
+    if len(list1) != len(list2):
+        raise ValueError("Both lists must have the same number of vectors.")
+
+    total_distance = 0
+    for vec1, vec2 in zip(list1, list2):
+        total_distance += euclidean_distance(vec1, vec2)
+
+    average_dist = total_distance / len(list1)
+    return average_dist
