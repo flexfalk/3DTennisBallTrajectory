@@ -241,6 +241,53 @@ def create_synthetic_shots(N: int):
         back_player_shots.append(init_params)
 
     return front_player_shots + back_player_shots
+import math
+def create_synthetic_shots_with_spin(N: int):
+
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
+
+    N_front_players_shots = int(N / 2)
+    N_back_player_shots = int(N / 2)
+
+    front_player_shots = []
+    back_player_shots = []
+
+
+
+    for i in range(N_front_players_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(-half_court_length - 1, - 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(10, 30)
+        vz = np.random.uniform(0, 5)
+
+        wx = np.random.uniform(-10*2*math.pi, 10*2*math.pi)
+        wy = np.random.uniform(-1*2*math.pi, 1*2*math.pi)
+        wz = np.random.uniform(-5*2*math.pi, 5*2*math.pi)
+
+        init_params = [x, y, z, vx, vy, vz, wx, wy, wz]
+        front_player_shots.append(init_params)
+
+    for i in range(N_back_player_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(1, half_court_length + 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(-10, -30)
+        vz = np.random.uniform(0, 5)
+
+        wx = np.random.uniform(-10*2*math.pi, 10*2*math.pi)
+        wy = np.random.uniform(-1*2*math.pi, 1*2*math.pi)
+        wz = np.random.uniform(-5*2*math.pi, 5*2*math.pi)
+
+        init_params = [x, y, z, vx, vy, vz, wx, wy, wz]
+
+        back_player_shots.append(init_params)
+
+    return front_player_shots + back_player_shots
 
 
 def project_points_numpy(trajectory, rotation_matrix, translation_vector, camera_matrix, distortion_coeffs):
