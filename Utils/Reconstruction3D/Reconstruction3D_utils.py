@@ -75,6 +75,61 @@ def create_3d_trajectory(output, N, until_ground_hit=False):
     return indexed_positions
 
 
+def create_3d_trajectory_with_spin(output, N, until_ground_hit=False):
+    position = output[:, 0:3]
+    v = output[:, 3:6]
+
+    spin = output[:, 6:9]
+
+    D = 0.00114
+    #     D = output[:, -1]
+    m = 0.056
+    t = 0  # Start time
+    N_max = 3 * N  # How many points we want per frame
+    t_max = N / 25
+    delta_t = t_max / N_max  # Time interval
+
+    g = torch.tensor([0.0, 0.0, -9.81], device=output.device)
+
+    magnus_coefficient = 0.0004
+
+    # positions = torch.tensor(position, device=output.device).view(1, 3)
+    # positions = torch.tensor(position, device=output.device).clone().view(1, 3)
+    positions = position.clone().view(1, 3)
+
+    if until_ground_hit:
+        while position[0, 2] > 0:
+            v_norm = torch.norm(v)
+
+            magnus_force = magnus_coefficient * torch.cross(spin, v)
+
+            drag_force = - 1 * (D / m) * v_norm * v
+
+            a = g + drag_force + magnus_force / m
+
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
+
+    else:
+        for i in range(N_max - 1):
+            v_norm = torch.norm(v)
+
+            magnus_force = magnus_coefficient * torch.cross(spin, v)
+
+            drag_force = - 1 * (D / m) * v_norm * v
+
+            a = g + drag_force + magnus_force / m
+
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
+
+    indices = [i for i in range(0, len(positions), 3)]
+    indexed_positions = positions[indices]
+
+    return indexed_positions
+
 def project_points_torch(trajectory: torch.tensor, rotation_matrix, translation_vector, camera_matrix,
                          distortion_coeffs):
     # Convert inputs to double precision
