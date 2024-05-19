@@ -78,6 +78,61 @@ def create_3d_trajectory(output, N, until_ground_hit=False, stepsize=3):
     return indexed_positions
 
 
+def create_3d_trajectory_with_spin(output, N, until_ground_hit=False):
+    position = output[:, 0:3]
+    v = output[:, 3:6]
+
+    spin = output[:, 6:9]
+
+    D = 0.00114
+    #     D = output[:, -1]
+    m = 0.056
+    t = 0  # Start time
+    N_max = 3 * N  # How many points we want per frame
+    t_max = N / 25
+    delta_t = t_max / N_max  # Time interval
+
+    g = torch.tensor([0.0, 0.0, -9.81], device=output.device)
+
+    magnus_coefficient = 0.0004
+
+    # positions = torch.tensor(position, device=output.device).view(1, 3)
+    # positions = torch.tensor(position, device=output.device).clone().view(1, 3)
+    positions = position.clone().view(1, 3)
+
+    if until_ground_hit:
+        while position[0, 2] > 0:
+            v_norm = torch.norm(v)
+
+            magnus_force = magnus_coefficient * torch.cross(spin, v)
+
+            drag_force = - 1 * (D / m) * v_norm * v
+
+            a = g + drag_force + magnus_force / m
+
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
+
+    else:
+        for i in range(N_max - 1):
+            v_norm = torch.norm(v)
+
+            magnus_force = magnus_coefficient * torch.cross(spin, v)
+
+            drag_force = - 1 * (D / m) * v_norm * v
+
+            a = g + drag_force + magnus_force / m
+
+            v = v + a * delta_t
+            position = position + v * delta_t + 0.5 * a * delta_t ** 2
+            positions = torch.cat((positions, position.view(1, 3)), dim=0)
+
+    indices = [i for i in range(0, len(positions), 3)]
+    indexed_positions = positions[indices]
+
+    return indexed_positions
+
 def project_points_torch(trajectory: torch.tensor, rotation_matrix, translation_vector, camera_matrix,
                          distortion_coeffs):
     # Convert inputs to double precision
@@ -184,6 +239,53 @@ def create_synthetic_shots(N: int):
         vz = np.random.uniform(0, 5)
 
         init_params = [x, y, z, vx, vy, vz]
+        back_player_shots.append(init_params)
+
+    return front_player_shots + back_player_shots
+import math
+def create_synthetic_shots_with_spin(N: int):
+
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
+
+    N_front_players_shots = int(N / 2)
+    N_back_player_shots = int(N / 2)
+
+    front_player_shots = []
+    back_player_shots = []
+
+
+
+    for i in range(N_front_players_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(-half_court_length - 1, - 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(10, 30)
+        vz = np.random.uniform(0, 5)
+
+        wx = np.random.uniform(-10*2*math.pi, 10*2*math.pi)
+        wy = np.random.uniform(-1*2*math.pi, 1*2*math.pi)
+        wz = np.random.uniform(-5*2*math.pi, 5*2*math.pi)
+
+        init_params = [x, y, z, vx, vy, vz, wx, wy, wz]
+        front_player_shots.append(init_params)
+
+    for i in range(N_back_player_shots):
+        x = np.random.uniform(-half_court_width - 1, half_court_width + 1)
+        y = np.random.uniform(1, half_court_length + 1)
+        z = np.random.uniform(0.1, 3)
+
+        vx = np.random.uniform(-4, 4)
+        vy = np.random.uniform(-10, -30)
+        vz = np.random.uniform(0, 5)
+
+        wx = np.random.uniform(-10*2*math.pi, 10*2*math.pi)
+        wy = np.random.uniform(-1*2*math.pi, 1*2*math.pi)
+        wz = np.random.uniform(-5*2*math.pi, 5*2*math.pi)
+
+        init_params = [x, y, z, vx, vy, vz, wx, wy, wz]
+
         back_player_shots.append(init_params)
 
     return front_player_shots + back_player_shots
