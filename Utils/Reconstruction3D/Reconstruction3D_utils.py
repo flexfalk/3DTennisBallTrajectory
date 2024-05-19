@@ -35,7 +35,7 @@ def custom_collate(batch):
         rotation_matrix), padded_poses, player1_homography, player2_homography, shot_id
 
 
-def create_3d_trajectory(output, N, until_ground_hit=False):
+def create_3d_trajectory(output, N, until_ground_hit=False, stepsize=3):
     position = output[:, 0:3]
     v = output[:, 3:6]
 
@@ -43,7 +43,8 @@ def create_3d_trajectory(output, N, until_ground_hit=False):
     #     D = output[:, -1]
     m = 0.056
     t = 0  # Start time
-    N_max = 3 * N  # How many points we want per frame
+
+    N_max = stepsize * N  # How many points we want per frame
     t_max = N / 25
     delta_t = t_max / N_max  # Time interval
 
