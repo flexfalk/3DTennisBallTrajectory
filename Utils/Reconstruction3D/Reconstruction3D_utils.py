@@ -416,7 +416,7 @@ def mse(vector1, vector2):
     return rmse
 
 
-def error_distance_landing_2(pred_traj, true_traj, homography_matrix):
+def error_distance_landing(pred_traj, true_traj, homography_matrix):
     if isinstance(pred_traj, torch.Tensor):
         pred_traj = pred_traj.cpu()
     if isinstance(true_traj, torch.Tensor):
