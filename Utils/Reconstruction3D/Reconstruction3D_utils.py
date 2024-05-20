@@ -416,7 +416,15 @@ def mse(vector1, vector2):
     return rmse
 
 
-def error_distance_landing(pred_traj, true_traj, homography_matrix):
+def error_distance_landing_2(pred_traj, true_traj, homography_matrix):
+    if isinstance(pred_traj, torch.Tensor):
+        pred_traj = pred_traj.cpu()
+    if isinstance(true_traj, torch.Tensor):
+        true_traj = true_traj.cpu()
+    if isinstance(homography_matrix, torch.Tensor):
+        homography_matrix = homography_matrix.cpu()
+    # pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
+
     pred_position = np.array(pred_traj)[0, -1]
     for i in range(len(pred_traj)):
         if pred_traj[i, -1] < 0:
@@ -445,9 +453,14 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
     return : a number determining which square of the field the true and predicted ball lands in
     """
 
-    # pred_position = np.array(pred_traj)[-1, :2]  # .reshape((-1,1,2))[-1]
+    if isinstance(pred_traj, torch.Tensor):
+        pred_traj = np.array(pred_traj.cpu())
+    if isinstance(true_traj, torch.Tensor):
+        true_traj = true_traj.cpu()
+    if isinstance(homography_matrix, torch.Tensor):
+        homography_matrix = homography_matrix.cpu()
 
-    pred_position = np.array(pred_traj)[0, -1]
+    pred_position = np.array(pred_traj)[0, 0:2]
     for i in range(len(pred_traj)):
         if pred_traj[i, -1] < 0:
             break
@@ -455,7 +468,6 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
             pred_position = np.array(pred_traj[i, 0:2])
 
     true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
-
 
     # Find homography for true 2d image coordinates
     true_position = cv2.perspectiveTransform(true_position, np.array(homography_matrix)).squeeze()
@@ -486,6 +498,7 @@ def ball_hits_court(pred_traj, true_traj, homography_matrix):
                     break
 
     return pred_square, true_square
+
 
 
 def get_important_cam_params(game, clip, camera_params_train):
