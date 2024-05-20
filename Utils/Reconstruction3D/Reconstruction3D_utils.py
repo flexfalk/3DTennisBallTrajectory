@@ -546,3 +546,26 @@ def average_distance(list1, list2):
     return average_dist
 
 
+def find_closest_player(player1, player2, points_2d):
+    player1_hip = player1[:, 14:16]
+    player2_hip = player2[:, 14:16]
+
+    start_2d = points_2d[0]
+    end_2d = points_2d[-1]
+
+    distance_player1 = np.linalg.norm(start_2d - player1_hip[0])
+    distance_player2 = np.linalg.norm(start_2d - player2_hip[0])
+
+    closest_player = np.argmin([distance_player1, distance_player2])
+
+    return [player1, player2][closest_player]
+
+
+def get_players(pose_numpy, start):
+    pose_df = pose_numpy[start, :]
+
+    player1 = pose_df[0:34].reshape(1, 34)
+
+    player2 = pose_df[34:].reshape(1, 34)
+
+    return player1, player2
