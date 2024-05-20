@@ -416,6 +416,24 @@ def mse(vector1, vector2):
     return rmse
 
 
+def error_distance_landing(pred_traj, true_traj, homography_matrix):
+    pred_position = np.array(pred_traj)[0, -1]
+    for i in range(len(pred_traj)):
+        if pred_traj[i, -1] < 0:
+            break
+        else:
+            pred_position = np.array(pred_traj[i, 0:2])
+
+    true_position = np.array(true_traj[0, -1]).reshape(-1, 1, 2)  # .reshape((-1,1,2))
+
+    # Find homography for true 2d image coordinates
+    true_position = cv2.perspectiveTransform(true_position, np.array(homography_matrix)).squeeze()
+
+    dist = np.linalg.norm(true_position - pred_position)
+
+    return dist
+
+
 def ball_hits_court(pred_traj, true_traj, homography_matrix):
     """
     This function dvivides the court in 12 square, three in width and 4 in height, meaning each half of the court consists of 6 squares.
