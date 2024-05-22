@@ -569,3 +569,44 @@ def get_players(pose_numpy, start):
     player2 = pose_df[34:].reshape(1, 34)
 
     return player1, player2
+
+
+def fix_trajectory(traj):
+    if traj[0] <= 0:
+        vals_to_change = []
+        i = 0
+
+        while traj[i] <= 0:
+            vals_to_change.append(i)
+            i += 1
+
+        for j in vals_to_change:
+            traj[j] = traj[i]
+
+    for i in range(len(traj)):
+        if traj[i] <= 0:
+            traj[i] = traj[i - 1]
+
+    return traj
+
+
+def clean_true(df):
+    v_to_remove = ["nan", " ", " nan"]
+    df["x_true"] = df.apply(
+        lambda row: [float(v) if v not in v_to_remove else 0 for v in row["x_true"].strip("[]").split(", ")], axis=1)
+    df["y_true"] = df.apply(
+        lambda row: [float(v) if v not in v_to_remove else 0 for v in row["y_true"].strip("[]").split(", ")], axis=1)
+
+    df['x_true'] = df['x_true'].apply(lambda row: fix_trajectory(row))
+    df['y_true'] = df['y_true'].apply(lambda row: fix_trajectory(row))
+    df = df.reset_index()
+    df = df.drop([432, 131, 483, 233, 440, 6, 420, 34, 317, 451, 272, 438, 342, 430])
+    return df.reset_index()
+
+
+def clean_predicted(ball_df):
+    ball_df = ball_df[ball_df["x_WASB"].apply(lambda x: len(x) > 3)].reset_index()
+    ball_df = ball_df.drop([293, 141, 462, 460, 443, 471, 35, 364, 6])
+    ball_df['x_WASB'] = ball_df['x_WASB'].apply(lambda row: str(fix_trajectory(eval(row))))
+    ball_df['y_WASB'] = ball_df['y_WASB'].apply(lambda row: str(fix_trajectory(eval(row))))
+    return ball_df.reset_index()
