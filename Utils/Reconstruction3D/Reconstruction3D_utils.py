@@ -601,6 +601,7 @@ def clean_true(df):
     df['y_true'] = df['y_true'].apply(lambda row: fix_trajectory(row))
     df = df.reset_index()
     df = df.drop([432, 131, 483, 233, 440, 6, 420, 34, 317, 451, 272, 438, 342, 430])
+    df = df[df['x_true'].apply(lambda row: len(row) > 5)]
     return df.reset_index()
 
 
@@ -609,4 +610,5 @@ def clean_predicted(ball_df):
     ball_df = ball_df.drop([293, 141, 462, 460, 443, 471, 35, 364, 6])
     ball_df['x_WASB'] = ball_df['x_WASB'].apply(lambda row: str(fix_trajectory(eval(row))))
     ball_df['y_WASB'] = ball_df['y_WASB'].apply(lambda row: str(fix_trajectory(eval(row))))
+    ball_df = ball_df[ball_df['x_WASB'].apply(lambda row: len(eval(row)) > 5)]
     return ball_df.reset_index()
