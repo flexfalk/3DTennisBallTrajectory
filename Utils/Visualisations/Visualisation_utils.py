@@ -229,3 +229,57 @@ def shot_plotter(image_path: str, projected_path: torch.tensor, trajectory_3d: t
                           azim=angle[1])  # Change the elevation (up-down) and azimuth (left-right) angles
     plt.tight_layout()
     plt.show()
+
+
+def shot_plotter_for_report(image_path, projected_path, trajectory_3d, labels, with_label):
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
+
+    img = cv2.imread(image_path)
+
+    fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+
+    # Plot the image with projected path and labels
+    axs[0].imshow(img)
+    for i in range(len(projected_path)):
+        s = (i + 1) * 2
+        axs[0].scatter(projected_path[i, 0], projected_path[i, 1], s=s, color="green",
+                       label="Reprojected Shot" if i == 0 else "")
+        if with_label:
+            axs[0].scatter(labels[i, 0], labels[i, 1], s=s, color="red", label="True Shot" if i == 0 else "")
+    axs[0].set_title("Reprojection on real shot")
+    axs[0].legend()
+
+    # Plot the first 3D trajectory
+    ax1 = fig.add_subplot(132, projection='3d')
+    for i in range(len(trajectory_3d)):
+        s = (i + 1) * 2
+        color = 'green' if trajectory_3d[i, 2] > 0 else 'black'
+        ax1.scatter(trajectory_3d[i, 0], trajectory_3d[i, 1], trajectory_3d[i, 2], s=s, c=color)
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_zlabel('Z')
+    ax1.set_title('Tennis Shot Trajectory 1')
+    ax1.set_xlim(-half_court_length - 2, half_court_length + 2)
+    ax1.set_ylim(-half_court_length - 2, half_court_length + 2)
+    ax1.set_zlim(-1, 4)
+    ax1.view_init(elev=0, azim=0)
+    plot_tennis_court(ax1)
+
+    # Plot the second 3D trajectory
+    ax2 = fig.add_subplot(133, projection='3d')
+    for i in range(len(trajectory_3d)):
+        s = (i + 1) * 2
+        color = 'green' if trajectory_3d[i, 2] > 0 else 'black'
+        ax2.scatter(trajectory_3d[i, 0], trajectory_3d[i, 1], trajectory_3d[i, 2], s=s, c=color)
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
+    ax2.set_zlabel('Z')
+    ax2.set_title('Tennis Shot Trajectory 2')
+    ax2.set_xlim(-half_court_length - 2, half_court_length + 2)
+    ax2.set_ylim(-half_court_length - 2, half_court_length + 2)
+    ax2.set_zlim(-1, 4)
+    ax2.view_init(elev=90, azim=-90)
+    plot_tennis_court(ax2)
+
+    plt.tight_layout()
+    plt.show()
