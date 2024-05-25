@@ -283,3 +283,5 @@ def shot_plotter_for_report(image_path, projected_path, trajectory_3d, labels, w
 
     plt.tight_layout()
     plt.show()
+
+    return fig
