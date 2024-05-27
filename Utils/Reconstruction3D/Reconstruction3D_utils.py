@@ -94,7 +94,7 @@ def create_3d_trajectory_with_spin(output, N, until_ground_hit=False, stepsize=3
 
     g = torch.tensor([0.0, 0.0, -9.81], device=output.device)
 
-    magnus_coefficient = 0.0004
+    magnus_coefficient = 0.00041
 
     # positions = torch.tensor(position, device=output.device).view(1, 3)
     # positions = torch.tensor(position, device=output.device).clone().view(1, 3)
@@ -108,7 +108,7 @@ def create_3d_trajectory_with_spin(output, N, until_ground_hit=False, stepsize=3
 
             drag_force = - 1 * (D / m) * v_norm * v
 
-            a = g + drag_force + magnus_force / m
+            a = g + drag_force + magnus_force #/ m
 
             v = v + a * delta_t
             position = position + v * delta_t + 0.5 * a * delta_t ** 2
@@ -122,7 +122,7 @@ def create_3d_trajectory_with_spin(output, N, until_ground_hit=False, stepsize=3
 
             drag_force = - 1 * (D / m) * v_norm * v
 
-            a = g + drag_force + magnus_force / m
+            a = g + drag_force + magnus_force #/ m
 
             v = v + a * delta_t
             position = position + v * delta_t + 0.5 * a * delta_t ** 2
@@ -689,7 +689,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
         D = 0.0012
         m = 0.056
         g = [0.0, 0.0, -9.82]
-        magnus_coefficient = 0.0004
+        magnus_coefficient = 0.00041
 
         N_max = N * 3
         t_max = N / 25
@@ -712,7 +712,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
 
             drag_force = - 1 * (D / m) * v_norm * vel
 
-            a = g + drag_force + magnus_force / m
+            a = g + drag_force + magnus_force #/ m
             vel = vel + a * dt
             position = position + vel * dt + 0.05 * a * dt ** 2
         #         loss = np.linalg.norm(positions- traj)
@@ -847,7 +847,7 @@ def solve_trajectory_synthetic(shot_number, camera_params_train, synthetic, spin
         D = 0.0012
         m = 0.056
         g = [0.0, 0.0, -9.82]
-        magnus_coefficient = 0.0004
+        magnus_coefficient = 0.00041
 
         N_max = N * 3
         t_max = N / 25
@@ -869,7 +869,7 @@ def solve_trajectory_synthetic(shot_number, camera_params_train, synthetic, spin
             magnus_force = magnus_coefficient * np.cross(spin, vel)
 
             drag_force = - 1 * (D / m) * v_norm * vel
-            a = g + drag_force + magnus_force / m
+            a = g + drag_force + magnus_force #/ m
             vel = vel + a * dt
             position = position + vel * dt + 0.05 * a * dt ** 2
 
