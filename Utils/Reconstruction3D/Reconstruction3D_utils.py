@@ -81,7 +81,7 @@ def create_3d_trajectory(output, N, until_ground_hit=False, stepsize=3):
 def create_3d_trajectory_with_spin(output, N, until_ground_hit=False, stepsize=3):
     position = output[:, 0:3]
     v = output[:, 3:6]
-
+    fps = 30
     spin = output[:, 6:9]
 
     D = 0.00114
@@ -89,7 +89,7 @@ def create_3d_trajectory_with_spin(output, N, until_ground_hit=False, stepsize=3
     m = 0.056
     t = 0  # Start time
     N_max = stepsize * N  # How many points we want per frame
-    t_max = N / 25
+    t_max = N / fps
     delta_t = t_max / N_max  # Time interval
 
     g = torch.tensor([0.0, 0.0, -9.81], device=output.device)
