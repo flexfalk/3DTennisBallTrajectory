@@ -664,7 +664,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
     x_scale = 10.97 / 2
     y_scale = 23.77 / 2
 
-    fps =30
+    fps = 30
     substeps = 10
     N = len(traj)
 
@@ -685,7 +685,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
         position = np.array(p[:3])
         vel = np.array(p[3:6])
         spin = np.array(p[6:9])
-
+        fps = 30
         D = 0.0012
         m = 0.056
         g = [0.0, 0.0, -9.82]
@@ -740,11 +740,11 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
         position_initial = np.array(p[:3])
         position = np.array(p[:3])
         vel = np.array(p[3:6])
-
+        #fps = 30
         D = 0.0012
         m = 0.056
         g = [0.0, 0.0, -9.82]
-
+        fps = 30
         N_max = N * 3
         t_max = N / fps
         dt = t_max / N_max
