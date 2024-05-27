@@ -38,14 +38,14 @@ def custom_collate(batch):
 def create_3d_trajectory(output, N, until_ground_hit=False, stepsize=3):
     position = output[:, 0:3]
     v = output[:, 3:6]
-
+    fps = 30
     D = 0.00114
     #     D = output[:, -1]
     m = 0.056
     t = 0  # Start time
 
     N_max = stepsize * N  # How many points we want per frame
-    t_max = N / 25
+    t_max = N / fps
     delta_t = t_max / N_max  # Time interval
 
     g = torch.tensor([0.0, 0.0, -9.81], device=output.device)
@@ -664,7 +664,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
     x_scale = 10.97 / 2
     y_scale = 23.77 / 2
 
-    fps = 25
+    fps =30
     substeps = 10
     N = len(traj)
 
@@ -692,7 +692,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
         magnus_coefficient = 0.00041
 
         N_max = N * 3
-        t_max = N / 25
+        t_max = N / fps
         dt = t_max / N_max
 
         positions = []
@@ -746,7 +746,7 @@ def solve_trajectory(shot_number, camera_params_train, ball_df, pose_numpy, grou
         g = [0.0, 0.0, -9.82]
 
         N_max = N * 3
-        t_max = N / 25
+        t_max = N / fps
         dt = t_max / N_max
 
         positions = []
@@ -822,7 +822,7 @@ def solve_trajectory_synthetic(shot_number, camera_params_train, synthetic, spin
     x_scale = 10.97 / 2
     y_scale = 23.77 / 2
 
-    fps = 25
+    fps = 30
     substeps = 10
     N = len(traj)
 
@@ -850,7 +850,7 @@ def solve_trajectory_synthetic(shot_number, camera_params_train, synthetic, spin
         magnus_coefficient = 0.00041
 
         N_max = N * 3
-        t_max = N / 25
+        t_max = N / fps
         dt = t_max / N_max
 
         positions = []
@@ -903,7 +903,7 @@ def solve_trajectory_synthetic(shot_number, camera_params_train, synthetic, spin
         g = [0.0, 0.0, -9.82]
 
         N_max = N * 3
-        t_max = N / 25
+        t_max = N / fps
         dt = t_max / N_max
 
         positions = []
