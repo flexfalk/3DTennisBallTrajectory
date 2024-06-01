@@ -285,3 +285,69 @@ def shot_plotter_for_report(image_path, projected_path, trajectory_3d, labels, w
     plt.show()
 
     return fig
+
+
+def new_pose_plotter(image_path, filtered_poses_path):
+    data = pd.read_csv(filtered_poses_path)
+
+    #     print(data.columns)
+    _pose = data[['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+                  '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22',
+                  '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34',
+                  '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46',
+                  '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58',
+                  '59', '60', '61', '62', '63', '64', '65', '66', '67']]
+
+    frame = cv2.imread(image_path)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # paint pose
+    current_pose = np.array(_pose.iloc[0].tolist()).reshape((34, 2))
+
+    # Draw circles for keypoints
+    for i, keypoint in enumerate(current_pose):
+        if i > 16:
+            color = (0, 0, 255)
+        else:
+            color = (255, 0, 0)
+        cv2.circle(frame, (int(keypoint[0]), int(keypoint[1])), 9, color, -1)
+
+    # Draw lines to connect keypoints
+    connections = [[0, 1], [0, 2], [2, 1], [1, 3], [2, 4], [4, 6], [6, 8], [8, 10],
+                   [6, 5], [6, 12], [12, 11], [12, 14], [14, 16], [15, 13], [13, 11],
+                   [11, 5], [5, 7], [7, 9], [5, 3]]
+
+    connections2 = [(x + 17, y + 17) for (x, y) in connections]
+
+    for connection in connections:
+        cv2.line(frame, (int(current_pose[connection[0]][0]), int(current_pose[connection[0]][1])),
+                 (int(current_pose[connection[1]][0]), int(current_pose[connection[1]][1])), (128, 128, 128), 1)
+
+    for connection in connections2:
+        cv2.line(frame, (int(current_pose[connection[0]][0]), int(current_pose[connection[0]][1])),
+                 (int(current_pose[connection[1]][0]), int(current_pose[connection[1]][1])), (128, 128, 128), 1)
+
+    fig, axs = plt.subplots(1, 1, figsize=(10, 5))
+
+    axs.imshow(frame, cmap=None)
+
+    return fig
+
+
+def new_shot_plotter(image_path: str, labels: torch.tensor):
+    court_length, court_width, half_court_length, half_court_width, net_height_middle, net_height_sides = get_court_dimension()
+
+    img = cv2.imread(image_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    fig, axs = plt.subplots(1, 1, figsize=(10, 5))
+
+    axs.imshow(img, cmap=None)
+    for i in range(len(labels)):
+        s = (len(labels) - i - 1) * 20
+        alpha = 1 - (i / len(labels))
+        #             print(s)
+        axs.scatter(labels[i, 0], labels[i, 1], s=s, color="red", alpha=alpha)
+
+    plt.show()
+    return fig
