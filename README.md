@@ -14,6 +14,7 @@ Morten Holck Ertner, Sofus Schou Konglevoll, Magnus Ibh, and Stella Graßhof. 20
 
 ### Bibtex
 
+```bibtex
 @inproceedings{10.1145/3689061.3689073,
 author = {Ertner, Morten Holck and Konglevoll, Sofus Schou and Ibh, Magnus and Gra{\ss}hof, Stella},
 title = {SynthNet: Leveraging Synthetic Data for 3D Trajectory Estimation from Monocular Video},
@@ -31,3 +32,4 @@ keywords = {3d reconstruction, ball tracking, computer vision, differential equa
 location = {Melbourne VIC, Australia},
 series = {MMSports '24}
 }
+```
