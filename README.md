@@ -1,6 +1,6 @@
-# TennisTrajectoryReconstruction
+# SynthNet: Leveraging Synthetic Data for 3D Trajectory Estimation from Monocular Video
 
-This is the official repository of the paper with the title [*SynthNet: Leveraging Synthetic Data for 3D Trajectory Estimation from Monocular Video*](https://dl.acm.org/doi/10.1145/3689061.3689073). 
+This is the official repository of the paper with the title [*SynthNet: Leveraging Synthetic Data for 3D Trajectory Estimation from Monocular Video*](https://dl.acm.org/doi/10.1145/3689061.3689073) about Tennis Trajectory Reconstruction.
 
 Note that it is open access!
 
